@@ -1,0 +1,120 @@
+Do Maina
+private void btnZarzadzajUzytkownikami_Click(object sender, EventArgs e)
+{
+    if (isAdmin)
+    {
+        using (ZarzadzanieUzytkownikamiForm form = new ZarzadzanieUzytkownikamiForm())
+        {
+            form.ShowDialog();
+        }
+    }
+    else
+    {
+        MessageBox.Show("Brak uprawnień. Tylko administrator może zarządzać użytkownikami.");
+    }
+}
+Do main.designer.cs
+private Button btnZarzadzajUzytkownikami;
+
+this.btnZarzadzajUzytkownikami = new System.Windows.Forms.Button();
+this.btnZarzadzajUzytkownikami.Text = "Zarządzaj użytkownikami";
+this.btnZarzadzajUzytkownikami.Click += new System.EventHandler(this.btnZarzadzajUzytkownikami_Click);
+// Dodaj do Controls i ustaw pozycję np.:
+this.Controls.Add(this.btnZarzadzajUzytkownikami);
+Nowy form 
+using System;
+using System.Data;
+using System.Windows.Forms;
+using MySql.Data.MySqlClient;
+
+namespace Wyporzyczalnia_Gier
+{
+    public partial class ZarzadzanieUzytkownikamiForm : Form
+    {
+        private Database db = new Database();
+
+        public ZarzadzanieUzytkownikamiForm()
+        {
+            InitializeComponent();
+            LoadUsers();
+        }
+
+        private void LoadUsers()
+        {
+            string sql = "SELECT id, login, is_admin FROM uzytkownicy";
+            dgvUsers.DataSource = db.Query(sql);
+        }
+
+        private void btnDelete_Click(object sender, EventArgs e)
+        {
+            if (dgvUsers.SelectedRows.Count > 0)
+            {
+                int userId = Convert.ToInt32(dgvUsers.SelectedRows[0].Cells["id"].Value);
+                if (MessageBox.Show("Czy na pewno chcesz usunąć tego użytkownika?", "Potwierdzenie", MessageBoxButtons.YesNo) == DialogResult.Yes)
+                {
+                    string sql = "DELETE FROM uzytkownicy WHERE id = @id";
+                    db.Execute(sql, new MySqlParameter[] { new MySqlParameter("@id", userId) });
+                    LoadUsers();
+                }
+            }
+        }
+    }
+}
+
+Nowy form.desiger
+namespace Wyporzyczalnia_Gier
+{
+    partial class ZarzadzanieUzytkownikamiForm
+    {
+        private System.ComponentModel.IContainer components = null;
+        private System.Windows.Forms.DataGridView dgvUsers;
+        private System.Windows.Forms.Button btnDelete;
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && (components != null))
+            {
+                components.Dispose();
+            }
+            base.Dispose(disposing);
+        }
+
+        private void InitializeComponent()
+        {
+            this.dgvUsers = new System.Windows.Forms.DataGridView();
+            this.btnDelete = new System.Windows.Forms.Button();
+            ((System.ComponentModel.ISupportInitialize)(this.dgvUsers)).BeginInit();
+            this.SuspendLayout();
+
+            // dgvUsers
+            this.dgvUsers.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgvUsers.Location = new System.Drawing.Point(12, 12);
+            this.dgvUsers.Name = "dgvUsers";
+            this.dgvUsers.Size = new System.Drawing.Size(460, 300);
+            this.dgvUsers.TabIndex = 0;
+            this.dgvUsers.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            this.dgvUsers.MultiSelect = false;
+            this.dgvUsers.ReadOnly = true;
+
+            // btnDelete
+            this.btnDelete.Location = new System.Drawing.Point(12, 320);
+            this.btnDelete.Name = "btnDelete";
+            this.btnDelete.Size = new System.Drawing.Size(460, 30);
+            this.btnDelete.TabIndex = 1;
+            this.btnDelete.Text = "Usuń wybranego użytkownika";
+            this.btnDelete.UseVisualStyleBackColor = true;
+            this.btnDelete.Click += new System.EventHandler(this.btnDelete_Click);
+
+            // ZarzadzanieUzytkownikamiForm
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.ClientSize = new System.Drawing.Size(484, 361);
+            this.Controls.Add(this.btnDelete);
+            this.Controls.Add(this.dgvUsers);
+            this.Name = "ZarzadzanieUzytkownikamiForm";
+            this.Text = "Zarządzanie użytkownikami";
+            ((System.ComponentModel.ISupportInitialize)(this.dgvUsers)).EndInit();
+            this.ResumeLayout(false);
+        }
+    }
+}
